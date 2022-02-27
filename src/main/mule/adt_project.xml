@@ -8,23 +8,18 @@ http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sft
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/hdfs http://www.mulesoft.org/schema/mule/hdfs/current/mule-hdfs.xsd">
-	<db:config name="Database_Config" doc:name="Database Config" doc:id="7cc7cdac-b8bc-4542-b2c4-19dc5f8b7cc4" >
-		<db:my-sql-connection />
-	</db:config>
-	<file:config name="File_Config" doc:name="File Config" doc:id="6d7c51b6-257f-4278-b374-a20de791c3c1" >
-		<file:connection workingDir="/Users/suhailsinghbains/Downloads/ADT_Project_Data" >
-			<reconnection >
-				<reconnect />
-			</reconnection>
-		</file:connection>
-	</file:config>
+	<hdfs:hdfs-config name="Hdfs_Hdfs" doc:name="Hdfs Hdfs" doc:id="bb3ba411-51bd-494b-8802-a7a6abc21c1b" >
+		<hdfs:simple-connection nameNodeUri="hdfs://172.31.1.44:9000/user/hdoop/" username="hdoop"/>
+	</hdfs:hdfs-config>
 	<flow name="adt_projectFlow" doc:id="d97751c9-49fc-4755-b80e-b1a392e6929d" >
 		<scheduler doc:name="Scheduler" doc:id="e0d46475-e65c-49c7-a5ee-dd1c4d0053bc" >
 			<scheduling-strategy >
-				<fixed-frequency />
+				<fixed-frequency frequency="100000"/>
 			</scheduling-strategy>
 		</scheduler>
-		<db:select doc:name="Select" doc:id="a78211dc-55c5-418a-aecd-bd913e893242" config-ref="Database_Config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3b1a88b0-b89a-4f38-b299-fcdc1e1b13ec" message="Schedular started"/>
+		<hdfs:read-operation doc:name="Read operation" doc:id="2d4adf9c-50c8-4273-afc6-04dd6eed5120" config-ref="Hdfs_Hdfs" path="/user/hdoop/customer_data.csv"/>
+		<logger level="INFO" doc:name="Logger" doc:id="fc31b26d-b1df-4fa1-8a2d-0328cdfe8a12" message="After Read"/>
 		<ee:transform doc:name="Transform Message" doc:id="da5e9d4c-bdc5-49c0-996b-46401da7f34b" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -33,6 +28,6 @@ output application/json
 payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<file:write doc:name="Write" doc:id="800fb802-b50c-41b0-a154-49870e24584a" config-ref="File_Config" path="ouput.json" mode="APPEND"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c1867194-7ab6-4f79-b806-13eadaf8e881" message="#[payload]"/>
 	</flow>
 </mule>

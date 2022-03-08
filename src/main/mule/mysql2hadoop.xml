@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:hdfs="http://www.mulesoft.org/schema/mule/hdfs" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/hdfs http://www.mulesoft.org/schema/mule/hdfs/current/mule-hdfs.xsd">
+	<flow name="mysql2hadoopFlow" doc:id="9acc5624-fb29-498a-a420-00fbccd1b3dd" >
+		<http:listener doc:name="Listener" doc:id="241860e7-a0b6-4546-abba-84b154c27495" config-ref="HTTP_Listener_config" path="/mysql2hadoop"/>
+		<logger level="INFO" doc:name="Logger" doc:id="8a0cafdb-c906-4ba8-b8a0-8a0a62eb6ec6" message="Request received from user to push data from MySQL to Hadoop"/>
+		<ee:transform doc:name="Transform Message" doc:id="87c7b5da-9a53-4b11-ac32-44a133feb3d1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+[{
+            "id": 7,
+            "email": "michael.lawson@reqres.in",
+            "first_name": "Michael",
+            "last_name": "Lawson",
+            "avatar": "https://reqres.in/img/faces/7-image.jpg"
+        },
+        {
+            "id": 8,
+            "email": "lindsay.ferguson@reqres.in",
+            "first_name": "Lindsay",
+            "last_name": "Ferguson",
+            "avatar": "https://reqres.in/img/faces/8-image.jpg"
+        },
+        {
+            "id": 9,
+            "email": "tobias.funke@reqres.in",
+            "first_name": "Tobias",
+            "last_name": "Funke",
+            "avatar": "https://reqres.in/img/faces/9-image.jpg"
+        },
+        {
+            "id": 10,
+            "email": "byron.fields@reqres.in",
+            "first_name": "Byron",
+            "last_name": "Fields",
+            "avatar": "https://reqres.in/img/faces/10-image.jpg"
+        },
+        {
+            "id": 11,
+            "email": "george.edwards@reqres.in",
+            "first_name": "George",
+            "last_name": "Edwards",
+            "avatar": "https://reqres.in/img/faces/11-image.jpg"
+        },
+        {
+            "id": 12,
+            "email": "rachel.howell@reqres.in",
+            "first_name": "Rachel",
+            "last_name": "Howell",
+            "avatar": "https://reqres.in/img/faces/12-image.jpg"
+        }]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e7defafa-ddd0-4891-91b7-72d3ec803958" message="#[payload]"/>
+		<hdfs:write doc:name="Write" doc:id="7e28dcaa-0a43-4d28-9e2c-447158274426" config-ref="Hdfs_Hdfs" path="/user/hdoop/ca-500_address.csv" ownerUserName="hdoop" ownerGroupName="supergroup" permission="0777" replication="3">
+		</hdfs:write>
+		<logger level="INFO" doc:name="Logger" doc:id="a7c0f143-8531-4638-b567-1475af99f305" message="#[payload]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="326c22ab-5c98-45fc-ae41-ba70b8c1dbe5" message="Push from MySQL to Hadoop complete"/>
+	</flow>
+</mule>

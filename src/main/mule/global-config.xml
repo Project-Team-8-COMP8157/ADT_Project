@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:hdfs="http://www.mulesoft.org/schema/mule/hdfs"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/hdfs http://www.mulesoft.org/schema/mule/hdfs/current/mule-hdfs.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="8ab9d952-9a87-4151-a833-a280c4595265" basePath="/" >
+		<http:listener-connection host="0.0.0.0" port="8081" >
+			<reconnection >
+				<reconnect />
+			</reconnection>
+		</http:listener-connection>
+	</http:listener-config>
+	<hdfs:hdfs-config name="Hdfs_Hdfs" doc:name="Hdfs Hdfs" doc:id="61d3e19a-84fa-4bb8-ae01-86fbcb3915ca" >
+		<hdfs:simple-connection nameNodeUri="hdfs://192.168.0.81:9000/user/hdoop/" username="hdoop">
+			<reconnection >
+				<reconnect />
+			</reconnection>
+		</hdfs:simple-connection>
+		<expiration-policy maxIdleTime="2" timeUnit="MINUTES" />
+	</hdfs:hdfs-config>
+	
+</mule>

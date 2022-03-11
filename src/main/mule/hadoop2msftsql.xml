@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:hdfs="http://www.mulesoft.org/schema/mule/hdfs" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/hdfs http://www.mulesoft.org/schema/mule/hdfs/current/mule-hdfs.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="hadoop2msftsqlFlow" doc:id="76cecdf9-823f-4687-b4aa-067541e91022" >
+		<http:listener doc:name="Listener" doc:id="d60956a1-0099-4152-a705-873841c6699e" config-ref="HTTP_Listener_config" path="/hadoop2msftsql"/>
+		<logger level="INFO" doc:name="Logger" doc:id="8cda0a68-10a8-4613-937d-af8261d70751" message="Request received from user to push data from Hadoop to MSFT SQL"/>
+		<hdfs:read-operation doc:name="Read operation" doc:id="92ef56d5-26db-49db-8bd2-146ca40df0f3" config-ref="Hdfs_Hdfs" path="ca-500_customer.csv" outputMimeType="application/csv">
+		</hdfs:read-operation>
+		<ee:transform doc:name="Transform Message" doc:id="2942948d-59f8-4f16-9ac5-fe147a4ed1c7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="0184aa18-ea3b-4d82-a9c0-8a38a60e07f7" message="#[payload]" />
+		<foreach doc:name="For Each" doc:id="99bd86f3-bff1-40a4-977c-ba0209decef5" collection="#[payload]">
+			<db:insert doc:name="Insert" doc:id="9db537a8-2b85-4383-952d-0629a08e891d" config-ref="Database_Config">
+			<db:sql><![CDATA[INSERT INTO [master].[dbo].[ca-500_customer] 
+("S_No","first_name","last_name","company_name","phone1","phone2","email","web") 
+VALUES
+(:SNo,:First_name,:Last_name,:Company_name,:Phone1,:Phone2,:Email,:Web);]]></db:sql>
+			<db:input-parameters><![CDATA[#[%dw 2.0
+output application/java
+---
+payload]]]></db:input-parameters>
+		</db:insert>
+		</foreach>
+		<logger level="INFO" doc:name="Logger" doc:id="0e6ec25d-736b-48b6-9215-1fcc34b43e55" message="Push from Hadoop to MSFT SQL complete"/>
+		<set-payload value="#[sizeOf(payload)]" doc:name="Set Payload" doc:id="084019ca-7a3f-4c0f-b0ac-fcd2c44bfef3" />
+	</flow>
+</mule>
